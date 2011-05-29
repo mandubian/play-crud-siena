@@ -1,4 +1,9 @@
-%{ pName = 'object.' + _name + '.' + play.db.Model.Manager.factoryFor(_field.property.relationType).keyName() }%
+%{ 
+pName = 'object.' + _name + '.' + play.db.Model.Manager.factoryFor(_field.property.relationType).keyName() 
+
+if(_caller.currentObject)
+	keyVal = play.modules.siena.SienaModelUtils.keyValue(_caller.currentObject)
+}%
 
 #{field 'object.' + _name}
     <label for="${field.id}">
@@ -7,7 +12,7 @@
 
     #{if _field.multiple}
         <input type="hidden" name="${pName}" value="" />
-        <select id="${field.id}" name="${pName}" multiple="yes">
+        <select id="${field.id}" name="${pName}" multiple="yes" #{if !keyVal}disabled="true"#{/if}>
             %{ _field.choices.each() { }%
             %{
                 selected = false;
@@ -26,6 +31,10 @@
             <option value="${it._key()}" ${selected ? 'selected="true"'.raw() : ''}>${it}#{if it._key() == _id } (me)#{/if}</option>
             %{ } }%
         </select>
+        
+        #{if !keyVal}
+    	<span class="error">Please save it once before selecting &{_name}</span>
+    	#{/if}
     #{/if}
     #{else}
         <select id="${field.id}" name="${pName}">
@@ -54,4 +63,5 @@
     #{ifError field.name}
         <span class="error">${field.error.raw()}</span>
     #{/ifError}
+    
 #{/field}

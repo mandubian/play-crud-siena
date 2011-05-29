@@ -18,7 +18,7 @@ public class ContainerModel extends EnhancedModel{
     @Column("embed")
     public EmbeddedModel embed;
     
-    public long test;
+    //public long test;
     
     public String toString() {
     	return id + " " + embed;

@@ -231,18 +231,19 @@ public abstract class CRUD extends Controller {
         Constructor<?> constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         Model object = (Model) constructor.newInstance();
+        // BAD IDEA because if there are constraints, the object is not saveds
         // if this is an automatic generated ID, saves it once before to have an id
-        boolean isGenerated = ClassInfo.isGenerated(ClassInfo.getIdField(type.entityClass));
-        if(isGenerated){
-        	object._save();
-        }
+//        boolean isGenerated = ClassInfo.isGenerated(ClassInfo.getIdField(type.entityClass));
+//        if(isGenerated){
+//        	object._save();
+//        }
         Binder.bind(object, "object", params.all());
         validation.valid(object);
         if (Validation.hasErrors()) {
         	// if it is a generated ID, deletes it not to keep an object with errors
-            if(isGenerated){
-            	object._delete();
-            }
+//            if(isGenerated){
+//            	object._delete();
+//            }
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
                 render(request.controller.replace(".", "/") + "/blank.html", type);
