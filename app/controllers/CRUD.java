@@ -204,6 +204,7 @@ public abstract class CRUD extends Controller {
             }
         }
         SienaPlugin.pm().save(object);
+
         flash.success(Messages.get("crud.saved", type.modelName));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
@@ -230,9 +231,18 @@ public abstract class CRUD extends Controller {
         Constructor<?> constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         Model object = (Model) constructor.newInstance();
+        // if this is an automatic generated ID, saves it once before to have an id
+        boolean isGenerated = ClassInfo.isGenerated(ClassInfo.getIdField(type.entityClass));
+        if(isGenerated){
+        	object._save();
+        }
         Binder.bind(object, "object", params.all());
         validation.valid(object);
         if (Validation.hasErrors()) {
+        	// if it is a generated ID, deletes it not to keep an object with errors
+            if(isGenerated){
+            	object._delete();
+            }
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
                 render(request.controller.replace(".", "/") + "/blank.html", type);
@@ -504,6 +514,9 @@ public abstract class CRUD extends Controller {
 	            	}
 	            	else if(Map.class.isAssignableFrom(field.getType())){
 	            		multipleType = "map";
+	            	}
+	            	else if(ClassInfo.isModel(field.getType())){
+	            		type = "relation";
 	            	}
 	            }
 	            
