@@ -1,6 +1,5 @@
 package play.modules.crudsiena;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -13,14 +12,12 @@ import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
-import play.modules.siena.Model;
-import siena.Id;
-import siena.SienaException;
+import play.modules.siena.SienaPlugin;
 
-public class SienaUtils {
-	public static <T extends Model> T addListElement(T o, String fieldName) {
+public class CrudSienaUtils {
+	public static <T> T addListElement(T o, String fieldName) {
     	try {
-    		Class<? extends Model> clazz = o.getClass();
+    		Class<?> clazz = o.getClass();
 			BeanWrapper bw = new BeanWrapper(o.getClass());
 			Field field = clazz.getField(fieldName);
 			
@@ -33,7 +30,7 @@ public class SienaUtils {
 					(Class<?>) ((ParameterizedType) 
 							field.getGenericType()).getActualTypeArguments()[0];
 				BeanWrapper embedbw = new BeanWrapper(embedClass);
-				Object embedObj = createObjectInstance(embedClass);
+				Object embedObj = siena.Util.createObjectInstance(embedClass);
 				
 				l.add(embedObj);
 				
@@ -45,14 +42,14 @@ public class SienaUtils {
 					clazz.getName() + "."+field.getName(), 
 					"validation.fieldList.badType", fieldName);			
 			
-			o.update();
+			SienaPlugin.pm().update(o);
 			return (T) o;
     	} catch (Exception e) {
 			throw new UnexpectedException(e);
 		}
 	}
 	
-	public static <T extends Model> T deleteListElement(T o, String fieldName, int idx) {
+	public static <T> T deleteListElement(T o, String fieldName, int idx) {
     	try {
     		Class<?> clazz = o.getClass();
 			BeanWrapper bw = new BeanWrapper(o.getClass());
@@ -76,7 +73,7 @@ public class SienaUtils {
 					clazz.getName() + "."+field.getName(), 
 					"validation.fieldList.badType", fieldName);
 
-			o.update();
+			SienaPlugin.pm().update(o);
 			
     		return (T) o;
     	} catch (Exception e) {
@@ -84,7 +81,7 @@ public class SienaUtils {
 		}
     }
 	
-	public static <T extends Model> T addMapElement(T o, String fieldName, String key) 
+	public static <T> T addMapElement(T o, String fieldName, String key) 
     {
     	try {
     		Class<?> clazz = o.getClass();
@@ -126,14 +123,14 @@ public class SienaUtils {
 					clazz.getName() + "."+field.getName(), 
 					"validation.fieldMap.badType", fieldName);			
 			
-			o.update();
+			SienaPlugin.pm().update(o);
 			return (T) o;
     	} catch (Exception e) {
 			throw new UnexpectedException(e);
 		}
 	}
 	
-	public static <T extends Model> T deleteMapElement(T o, String fieldName, String key)
+	public static <T> T deleteMapElement(T o, String fieldName, String key)
     {
     	try {
     		Class<?> clazz = o.getClass();
@@ -165,7 +162,7 @@ public class SienaUtils {
 					clazz.getName() + "."+field.getName(), 
 					"validation.fieldMap.badType", fieldName);
 
-			o.update();
+			SienaPlugin.pm().update(o);
 			
     		return (T) o;
     	} catch (Exception e) {
@@ -173,80 +170,6 @@ public class SienaUtils {
 		}
     }
 	
-    // More utils
-    public static Object findKey(Object entity) {
-        try {
-            Class<?> c = entity.getClass();
-            while (!c.equals(Object.class)) {
-                for (Field field : c.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(Id.class)) {
-                        field.setAccessible(true);
-                        return field.get(entity);
-                    }
-                }
-                c = c.getSuperclass();
-            }
-        } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + entity.getClass());
-        }
-        return null;
-    }    
-    
- 	public static Class<?> findKeyType(Class<?> c) {
-        try {
-            while (!c.equals(Object.class)) {
-                for (Field field : c.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(Id.class)) {
-                        field.setAccessible(true);
-                        return field.getType();
-                    }
-                }
-                c = c.getSuperclass();
-            }
-        } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + c);
-        }
-        return null;
-    }
- 	
- 	public static String findKeyName(Class<?> c) {
-        try {
-            while (!c.equals(Object.class)) {
-                for (Field field : c.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(Id.class)) {
-                        field.setAccessible(true);
-                        return field.getName();
-                    }
-                }
-                c = c.getSuperclass();
-            }
-        } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + c);
-        }
-        return null;
-    }
 
-	/**
-	 * Creates an instance of a class.
-	 * It tries to find a default constructor and if not found, it uses class.newInstance()
-	 * 
-	 * @param clazz the class
-	 * @return the instance
-	 */
-	public static Object createObjectInstance(Class<?> clazz){
-		try {
-			Constructor<?> c = clazz.getDeclaredConstructor();
-			c.setAccessible(true);
-			return c.newInstance();
-		}catch(NoSuchMethodException ex){
-			try {
-				return clazz.newInstance();
-			}catch (Exception e) {
-				throw new SienaException(e);
-			}
-		}catch(Exception e){
-			throw new SienaException(e);
-		}		
-	}
  	
 }

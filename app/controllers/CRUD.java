@@ -22,19 +22,20 @@ import play.data.validation.MaxSize;
 import play.data.validation.Password;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.Model;
 import play.exceptions.TemplateNotFoundException;
 import play.i18n.Messages;
-import play.modules.crudsiena.SienaUtils;
-import play.modules.siena.Model;
+import play.modules.crudsiena.CrudSienaUtils;
+import play.modules.siena.SienaModelUtils;
+import play.modules.siena.SienaPlugin;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
 import play.utils.Java;
+import siena.ClassInfo;
 import siena.DateTime;
 import siena.Id;
 import siena.Json;
-import siena.Query;
-import siena.Util;
 import siena.embed.Embedded;
 
 public abstract class CRUD extends Controller {
@@ -58,7 +59,7 @@ public abstract class CRUD extends Controller {
         if (page < 1) {
             page = 1;
         }
-        List<play.db.Model> objects = type.findPage(page, search, searchFields, orderBy, order, (String) request.args.get("where"));
+        List<Object> objects = type.findPage(page, search, searchFields, orderBy, order, (String) request.args.get("where"));
         Long count = type.count(search, searchFields, (String) request.args.get("where"));
         Long totalCount = type.count(null, null, (String) request.args.get("where"));
         try {
@@ -71,7 +72,7 @@ public abstract class CRUD extends Controller {
     public static void show(String id) {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Model object = type.findById(id);
+        Object object = SienaModelUtils.findById(type.entityClass, id);
         try {
             render(type, object);
         } catch (TemplateNotFoundException e) {
@@ -82,12 +83,12 @@ public abstract class CRUD extends Controller {
     public static void addListElement(String id, String field) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Model object = type.findById(id);
+        Object object = SienaModelUtils.findById(type.entityClass, id);
         if(object == null){
         	Validation.addError(field, "crud.addListElement.saveBefore", new String[0]);
         	renderArgs.put("error", Validation.error(field));
         }else {        
-        	SienaUtils.addListElement(object, field);
+        	CrudSienaUtils.addListElement(object, field);
             validation.valid(object);
             if (Validation.hasError(field)) {
                 renderArgs.put("error", Validation.error(field));
@@ -104,9 +105,9 @@ public abstract class CRUD extends Controller {
     public static void deleteListElement(String id, String field, Integer idx) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Model object = type.findById(id);
+        Object object = SienaModelUtils.findById(type.entityClass, id);
                 
-        SienaUtils.deleteListElement(object, field, idx);
+        CrudSienaUtils.deleteListElement(object, field, idx);
 
         validation.valid(object);
         if (Validation.hasError(field)) {
@@ -123,13 +124,13 @@ public abstract class CRUD extends Controller {
     public static void addMapElement(String id, String field, String mkey) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Model object = type.findById(id);
+        Object object = SienaModelUtils.findById(type.entityClass, id);
         
         if(object == null){
         	Validation.addError(field, "crud.addMapElement.saveBefore", new String[0]);
         	renderArgs.put("error", Validation.error(field));
         }else {            
-            SienaUtils.addMapElement(object, field, mkey);
+            CrudSienaUtils.addMapElement(object, field, mkey);
             validation.valid(object);
             if (Validation.hasError(field)) {
                 renderArgs.put("error", Validation.error(field));
@@ -145,9 +146,9 @@ public abstract class CRUD extends Controller {
     public static void deleteMapElement(String id, String field, String mkey) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Model object = type.findById(id);
+        Object object = SienaModelUtils.findById(type.entityClass, id);
                 
-        SienaUtils.deleteMapElement(object, field, mkey);
+        CrudSienaUtils.deleteMapElement(object, field, mkey);
 
         validation.valid(object);
         if (Validation.hasError(field)) {
@@ -164,7 +165,8 @@ public abstract class CRUD extends Controller {
     public static void attachment(String id, String field) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Model object = type.findById(id);
+        Object object = SienaModelUtils.findById(type.entityClass, id);
+
         notFoundIfNull(object);
         Object att = object.getClass().getField(field).get(object);
         if(att instanceof Model.BinaryField) {
@@ -189,7 +191,7 @@ public abstract class CRUD extends Controller {
     public static void save(String id) throws Exception {
     	ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Model object = type.findById(id);
+        Object object = SienaModelUtils.findById(type.entityClass, id);
         notFoundIfNull(object);
         Binder.bind(object, "object", params.all());
         validation.valid(object);
@@ -201,12 +203,12 @@ public abstract class CRUD extends Controller {
                 render("CRUD/show.html", type, object);
             }
         }
-        object._save();
+        SienaPlugin.pm().save(object);
         flash.success(Messages.get("crud.saved", type.modelName));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
-        redirect(request.controller + ".show", object._key());
+        redirect(request.controller + ".show", SienaModelUtils.keyValue(object));
     }
 
     public static void blank() throws Exception{
@@ -252,13 +254,13 @@ public abstract class CRUD extends Controller {
     public static void delete(String id) {
     	ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Model object = type.findById(id);
+        Object object = SienaModelUtils.findById(type.entityClass, id);
         notFoundIfNull(object);
         try {
-            object._delete();
+            SienaPlugin.pm().delete(object);
         } catch (Exception e) {
             flash.error(Messages.get("crud.delete.error", type.modelName));
-            redirect(request.controller + ".show", object._key());
+            redirect(request.controller + ".show", SienaModelUtils.keyValue(object));
         }
         flash.success(Messages.get("crud.deleted", type.modelName));
         redirect(request.controller + ".list");
@@ -272,7 +274,7 @@ public abstract class CRUD extends Controller {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface For {
-        Class<? extends Model> value();
+        Class<?> value();
     }
     
     @Retention(RetentionPolicy.RUNTIME)
@@ -291,21 +293,20 @@ public abstract class CRUD extends Controller {
     public static class ObjectType implements Comparable<ObjectType> {
 
         public Class<? extends Controller> controllerClass;
-        public Class<? extends Model> entityClass;
+        public Class<?> entityClass;
         public String name;
         public String modelName;
         public String controllerName;
         public String keyName;
         
-        public ObjectType(Class<? extends Model> modelClass) {
+        public ObjectType(Class<?> modelClass) {
             this.modelName = modelClass.getSimpleName();
             this.entityClass = modelClass;
-            this.keyName = Model.Manager.factoryFor(entityClass).keyName();
+            this.keyName = SienaModelUtils.keyName(entityClass);
         }
 
-        @SuppressWarnings("unchecked")
 		public ObjectType(String modelClass) throws ClassNotFoundException {
-            this((Class<? extends Model>) Play.classloader.loadClass(modelClass));
+            this((Class<?>) Play.classloader.loadClass(modelClass));
         }
 
         public static ObjectType forClass(String modelClass) throws ClassNotFoundException {
@@ -313,8 +314,8 @@ public abstract class CRUD extends Controller {
         }
 
         public static ObjectType get(Class<? extends Controller> controllerClass) {
-        	Class<? extends Model> entityClass = getEntityClassForController(controllerClass);
-            if (entityClass == null || !Model.class.isAssignableFrom(entityClass)) {
+        	Class<?> entityClass = getEntityClassForController(controllerClass);
+            if (entityClass == null /*|| !Model.class.isAssignableFrom(entityClass)*/) {
                 return null;
             }
             ObjectType type;
@@ -330,23 +331,25 @@ public abstract class CRUD extends Controller {
             return type;
         }
 
-        @SuppressWarnings("unchecked")
-		public static Class<? extends Model> getEntityClassForController(Class<? extends Controller> controllerClass) {
+		public static Class<?> getEntityClassForController(Class<? extends Controller> controllerClass) {
         	if (controllerClass.isAnnotationPresent(For.class)) {
-                return ((For) (controllerClass.getAnnotation(For.class))).value();
+        		Class<?> cl = ((For) (controllerClass.getAnnotation(For.class))).value();
+        		if(cl!=null && ClassInfo.isModel(cl))
+        			return cl;
+        		return null;
             }
             for(Type it : controllerClass.getGenericInterfaces()) {
                 if(it instanceof ParameterizedType) {
                     ParameterizedType type = (ParameterizedType)it;
                     if (((Class<?>)type.getRawType()).getSimpleName().equals("CRUDWrapper")) {
-                        return (Class<? extends Model>)type.getActualTypeArguments()[0];
+                        return (Class<?>)type.getActualTypeArguments()[0];
                     }
                 }
             }
             String name = controllerClass.getSimpleName().replace("$", "");
             name = "models." + name.substring(0, name.length() - 1);
             try {
-                return (Class<? extends Model>) Play.classloader.loadClass(name);
+                return (Class<?>) Play.classloader.loadClass(name);
             } catch (ClassNotFoundException e) {
                 return null;
             }
@@ -361,22 +364,23 @@ public abstract class CRUD extends Controller {
         }
 
         public Long count(String search, String searchFields, String where) {
-            return Model.Manager.factoryFor(entityClass).count(searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
+            return SienaModelUtils.count(SienaPlugin.pm(), entityClass, searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
         }
 
-        public List<play.db.Model> findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
-            return Model.Manager.factoryFor(entityClass).fetch((page - 1) * getPageSize(), getPageSize(), orderBy, order, searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
+        @SuppressWarnings("unchecked")
+		public List<Object> findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
+            return (List<Object>)SienaModelUtils.fetch(SienaPlugin.pm(), entityClass, (page - 1) * getPageSize(), getPageSize(), orderBy, order, searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
         }
         
-        public Model findById(Object id) {
+        public Object findById(Object id) {
             if (id == null) return null;
-            return (Model)Model.Manager.factoryFor(entityClass).findById(id);
+            return SienaPlugin.sienaModelFactory(entityClass).findById(id);
         }
         
         public List<ObjectField> getFields() {
             List<ObjectField> fields = new ArrayList<ObjectField>();
             List<ObjectField> hiddenFields = new ArrayList<ObjectField>();
-            for (Model.Property f : Model.Manager.factoryFor(entityClass).listProperties()) {
+            for (Model.Property f : SienaModelUtils.listProperties(SienaPlugin.pm(), entityClass)) {
                 ObjectField of = new ObjectField(f);                
                 if (of.type != null) {
                     if (of.type.equals("hidden")) {
@@ -510,8 +514,8 @@ public abstract class CRUD extends Controller {
                 return property.choices.list();
             }
             
-            public static List<ObjectField> getFields(Class clazz) {
-                List fields = new ArrayList();
+			public static List<ObjectField> getFields(Class<?> clazz) {
+                List<ObjectField> fields = new ArrayList<ObjectField>();
                 for (Field f : clazz.getFields()) {
                     if (Modifier.isTransient(f.getModifiers()) || Modifier.isFinal(f.getModifiers())) {
                         continue;
@@ -525,80 +529,7 @@ public abstract class CRUD extends Controller {
             }
 
             protected static Model.Property buildProperty(final Field field) {
-                Model.Property modelProperty = new Model.Property();
-                modelProperty.type = field.getType();
-                modelProperty.field = field;
-                // ONE-TO-ONE / MANY-TO-ONE
-                if (Model.class.isAssignableFrom(field.getType())) {
-                	modelProperty.isRelation = true;
-                    modelProperty.relationType = field.getType();
-                    modelProperty.choices = new Model.Choices() {
-
-                        @SuppressWarnings("unchecked")
-                        public List<Object> list() {
-                        	return (List<Object>)Model.all(field.getType()).fetch();
-                        }
-                    };
-                }
-                // AUTOMATIC QUERY
-                // ONE-TO-MANY
-                if (Query.class.isAssignableFrom(field.getType())) {
-                    final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                    
-                    modelProperty.isRelation = true;
-                    modelProperty.isMultiple = true;
-                    modelProperty.relationType = fieldType;
-                    modelProperty.choices = new Model.Choices() {
-                    	@SuppressWarnings("unchecked")
-                    	public List<Object> list() {
-                        	return (List<Object>)Model.all(fieldType).fetch();
-                    	}
-                    };
-                }
-                
-                // ENUM
-                if (field.getType().isEnum()) {
-                    modelProperty.choices = new Model.Choices() {
-                        @SuppressWarnings("unchecked")
-                        public List<Object> list() {
-                            return (List<Object>) Arrays.asList(field.getType().getEnumConstants());
-                        }
-                    };
-                }
-                
-                // JSON
-                if (Json.class.isAssignableFrom(field.getType())) {
-                    modelProperty.type = String.class;
-                }
-
-                if (field.isAnnotationPresent(Embedded.class)) {
-                	if(List.class.isAssignableFrom(field.getType())){
-                		final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                		
-                		modelProperty.isRelation = true;
-                        modelProperty.isMultiple = true;
-                        modelProperty.relationType = fieldType;
-                	}
-                	else if(Map.class.isAssignableFrom(field.getType())){
-                		// gets T2 for map<T1,T2>
-                		final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1];
-                		modelProperty.isRelation = true;
-                        modelProperty.isMultiple = true;
-                        modelProperty.relationType = fieldType;
-                	}
-                	else {
-                		modelProperty.isRelation = true;
-                		modelProperty.isMultiple = false;
-                		modelProperty.relationType = field.getType();
-                	}
-                }
-                
-                modelProperty.name = field.getName();
-                if (field.getType().equals(String.class)) {
-                    modelProperty.isSearchable = true;
-                }
-                
-                return modelProperty;
+                return SienaModelUtils.buildProperty(field, SienaPlugin.pm());
             }	        
 	    }
     }

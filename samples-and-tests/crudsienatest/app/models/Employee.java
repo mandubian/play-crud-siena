@@ -5,10 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import play.data.validation.Password;
-import play.modules.siena.Model;
+import play.modules.siena.EnhancedModel;
 import siena.Column;
 import siena.DateTime;
-import siena.Entity;
 import siena.Filter;
 import siena.Generator;
 import siena.Id;
@@ -16,7 +15,6 @@ import siena.Index;
 import siena.Json;
 import siena.Max;
 import siena.NotNull;
-import siena.Query;
 import siena.Table;
 import siena.embed.At;
 import siena.embed.Embedded;
@@ -25,7 +23,7 @@ import siena.embed.EmbeddedMap;
 
 
 @Table("employees")
-public class Employee extends Model {
+public class Employee extends EnhancedModel {
         
         @Id(Generator.AUTO_INCREMENT)
         public Long id;

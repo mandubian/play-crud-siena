@@ -4,12 +4,15 @@ import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class CrudSienaPlugin extends PlayPlugin {
+	
+    private CrudSienaEnhancer enhancer = new CrudSienaEnhancer();
+	
     /**
      * Enhance this class
      * @param applicationClass
      * @throws java.lang.Exception
      */
     public void enhance(ApplicationClass applicationClass) throws Exception {
-    	CrudSienaEnhancer.class.newInstance().enhanceThisClass(applicationClass);
+    	enhancer.enhanceThisClass(applicationClass);
     }
 }

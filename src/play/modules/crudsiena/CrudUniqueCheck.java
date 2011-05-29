@@ -3,6 +3,7 @@ package play.modules.crudsiena;
 import java.util.List;
 
 import play.exceptions.UnexpectedException;
+import play.modules.siena.SienaModelUtils;
 
 import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
@@ -51,7 +52,7 @@ public class CrudUniqueCheck extends AbstractAnnotationCheck<CrudUnique> {
 	                    Query<? extends Object> all = Model.all(validatedObject.getClass());
 	        			List<? extends Object> fetched = all.filter(fieldName, value).fetch();
 	        			if(fetched.size() == 0) return true;
-	        			Object sskey = SienaUtils.findKey(ss);
+	        			Object sskey = SienaModelUtils.keyValue(ss);
 	        			if(sskey == null) {
 	        				// new object => value already in database
 	        				return false;
@@ -60,7 +61,7 @@ public class CrudUniqueCheck extends AbstractAnnotationCheck<CrudUnique> {
 	        				// check if we can find the id inside the fetched objects
 	        				for(Object o : fetched) {
 	        					Model s = (Model) o;
-	        					Object skey = SienaUtils.findKey(s);
+	        					Object skey = SienaModelUtils.keyValue(ss);
 	        					if(skey!=null && skey.equals(sskey)) return true;
 	        				}
 	        				return false;

@@ -16,6 +16,7 @@ import javassist.bytecode.annotation.StringMemberValue;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.Enhancer;
+import siena.ClassInfo;
 import siena.Max;
 
 public class CrudSienaEnhancer extends Enhancer {
@@ -23,10 +24,43 @@ public class CrudSienaEnhancer extends Enhancer {
 	@Override
 	public void enhanceThisClass(ApplicationClass applicationClass)
 			throws Exception {
-        final CtClass ctClass = makeClass(applicationClass);
-        
-        if (!ctClass.subtypeOf(classPool.get("play.modules.siena.Model"))) {
+        Logger.debug("CrudSiena: trying to enhance class:" + applicationClass.name);
+		final CtClass ctClass = makeClass(applicationClass);
+		if(ctClass == null) return;
+		String pack = ctClass.getPackageName(); 
+        if(pack==null || pack.startsWith("java.")){
+        	return;
+        }        
+        if (ctClass.subtypeOf(classPool.get(siena.Json.class.getName()))) {
             return;
+        }
+        boolean isModel = false;
+        
+        if(ctClass.subclassOf(classPool.get(siena.Model.class.getName()))){
+        	isModel = true;
+        }     
+        else {        
+	        CtField[] fields = ctClass.getDeclaredFields();
+	        CtClass cl = ctClass;
+	        while(cl != null){
+		        for (CtField field : fields) {
+		        	Object[] annotations = field.getAnnotations();
+					for(Object ann: annotations){
+						if(ann.getClass() == siena.Id.class){
+							isModel = true;
+							break;
+						}
+					}
+					if(isModel){
+						break;
+					}
+		        }
+		        
+		        cl = cl.getSuperclass();
+	        }
+        }
+        if(!isModel){
+        	return;
         }
         
         Logger.debug("CrudSiena: start to enhance class:" + applicationClass.name);

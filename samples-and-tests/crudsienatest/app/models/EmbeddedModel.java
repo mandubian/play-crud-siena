@@ -1,14 +1,15 @@
 package models;
 
-import play.modules.siena.Model;
+import play.modules.siena.EnhancedModel;
 import siena.Generator;
 import siena.Id;
 import siena.Table;
 import siena.embed.EmbeddedMap;
 
-@Table("uuid_models")
-public class UUIDModel extends Model{
-    @Id(Generator.UUID)
+@Table("embedded_models")
+@EmbeddedMap
+public class EmbeddedModel extends EnhancedModel{
+    @Id(Generator.NONE)
     public String id;
     
     public String 	alpha;

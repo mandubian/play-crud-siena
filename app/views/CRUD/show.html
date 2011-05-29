@@ -1,6 +1,6 @@
 #{extends 'CRUD/layout.html' /}
 %{
-    def keyVal = play.modules.crudsiena.SienaUtils.findKey(object)
+    def keyVal = play.modules.siena.SienaModelUtils.keyValue(object)
   }%
 <div id="crudShow" class="${type.name}">
 	

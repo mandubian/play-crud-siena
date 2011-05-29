@@ -1,1 +1,7 @@
 /.project
+/lib
+/.classpath
+/commands.pyc
+/dist
+/.settings
+/modules
