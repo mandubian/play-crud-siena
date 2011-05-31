@@ -53,7 +53,12 @@ public abstract class CRUD extends Controller {
         render("CRUD/index.html");
     }
 
-    public static void list(int page, String search, String searchFields, String orderBy, String order) {
+    public static void list(int page, String search, String searchFields, String orderBy, String order, String[] fields) {
+    	// if fields is of length 1, it means this is one field or a list of field separated by commas
+    	if(fields != null && fields.length == 1){
+    		fields = fields[0].split(",");
+    	}
+    	
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         if (page < 1) {
@@ -65,7 +70,7 @@ public abstract class CRUD extends Controller {
         try {
             render(type, objects, count, totalCount, page, orderBy, order);
         } catch (TemplateNotFoundException e) {
-            render("CRUD/list.html", type, objects, count, totalCount, page, orderBy, order);
+            render("CRUD/list.html", type, objects, count, totalCount, page, orderBy, order, fields);
         }
     }
 
@@ -406,6 +411,14 @@ public abstract class CRUD extends Controller {
             return hiddenFields;
         }
 
+        public List<String> getRawFields() {
+        	List<String> fields = new ArrayList<String>();
+            for (Field f : ClassInfo.getClassInfo(entityClass).allFields) {
+                fields.add(f.getName());
+            }
+            return fields;
+        }
+        
         public ObjectField getField(String name) {
             for (ObjectField field : getFields()) {
                 if (field.name.equals(name)) {

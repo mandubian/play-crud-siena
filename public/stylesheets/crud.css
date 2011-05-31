@@ -284,6 +284,21 @@ form .removeAttachment {
 	width: 40%;
 }
 
+#crudListFields a {
+	color: #111 !important;
+	font-size: 90%;
+}
+
+#crudListFields {
+	padding: 4px 5px;
+	border: 1px solid #ddd;
+	background: #efefef;
+}
+
+#crudListFields input[type=text] {
+	width: 40%;
+}
+
 #crudListSearch a {
 	color: #111 !important;
 	font-size: 90%;

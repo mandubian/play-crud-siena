@@ -24,7 +24,6 @@ public class CrudSienaEnhancer extends Enhancer {
 	@Override
 	public void enhanceThisClass(ApplicationClass applicationClass)
 			throws Exception {
-        Logger.debug("CrudSiena: trying to enhance class:" + applicationClass.name);
 		final CtClass ctClass = makeClass(applicationClass);
 		if(ctClass == null) return;
 		String pack = ctClass.getPackageName(); 
@@ -63,7 +62,7 @@ public class CrudSienaEnhancer extends Enhancer {
         	return;
         }
         
-        Logger.debug("CrudSiena: start to enhance class:" + applicationClass.name);
+        Logger.debug("CrudSiena: Enhancing class:" + applicationClass.name);
         // this method will be called after configuration finished
         
         for (CtField cf: ctClass.getDeclaredFields()) {

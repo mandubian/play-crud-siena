@@ -56,6 +56,9 @@ crud.addMapElement.saveBefore = Please save the object once before adding map el
 crud.addMapElement.success = Element successfully added to map
 crud.deleteMapElement.success = Element successfully deleted from map
 
+crud.filterList = Filter Fields
+crud.resetList = Reset Fields
+crud.gae.searchlimited = In GAE, you can search on 1 field at a time. Please filter to have 1 field...
 crud.map.key = Key
 crud.map.pleasefillkey = Please fill the key field
 
