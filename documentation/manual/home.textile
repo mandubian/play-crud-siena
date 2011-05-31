@@ -1,46 +1,68 @@
-p(note). the module project is hosted by google code at "mandubian-play-crud-siena":http://code.google.com/p/mandubian-play-crud-siena under MIT license
+p(note). Since v2.0.0, the project is hosted by Github "play-crud-siena":https://github.com/mandubian/play-crud-siena under MIT license
 
-h1. CRUD Siena Play! v1.6 release notes
+h1. CRUD Siena Play! v2.x
 
-* Play v1.2 support with 1.6_Play1.2 
-* Play v1.1 support with 1.6_Play1.1 
-* support for byte[]/enums/GAE blobs
+h2. Release notes
 
+* v2.x has to be considered in parallel with "Play Module siena-2.0.0":http://www.playframework.org/modules/siena-2.0.0/home as both modules were developed together.
 
-h1. CRUD Siena Play! module How-to
+* v2.x requires Play >v1.2.1 (due to a bug in transitive module dependencies in v1.2).
 
-The CRUD (Create, Read, Update, Delete) Siena module generates a fully usable web interface for your Siena Model objects.
+* v2.x supports :
+** GAE 
+** MySQL
+** Postgresql
+** H2
 
-h2. <a>Enable Siena support to your Play! project</a>
+* v2.x main new features:
+** support for IDs of type Long (auto-generated or manual) and String (manual or auto-generated as UUID).
+** A new field filter in entity tables that allows to choose which fields are displayed.
+** The search has been implemented also with some limitations depending on the DB type (and still strange issues to correct IMO).
+** ONE2ONE/ONE2MANY/embedded management has been improved.
 
-p(note). **Note** Just call this command to get last siena version:
-
-bc.. play install siena
-
-h2. <a>Install CrudSiena module</a>
-
-h3. For Play! =1.2, install CrudSiena 1.6_play1.2:
-
-bc.. play install crudsiena-1.6_play1.2
-
-h3. For Play! =1.1.x_, install CrudSiena 1.6_play1.1:
-
-bc.. play install crudsiena-1.6_play1.1
-
-h3. For Play! <1.1_, install CrudSiena 1.01:
-
-bc.. play install crudsiena-1.01
+* v2.x is a complete refactoring of crudsiena module based on Siena v1.x. Yet, for those who used Siena before, it doesn't change anything as Siena v1.0.0 is 100% backward compatible (at least in theory).
 
 
+p(note). **IMPORTANT** The main difference to know is that now **SienaSupport class has been removed** completely as the Siena Crud manages any Siena Class if there is a Controller for it.
 
-h2. <a>Your Siena entity shall inherit SienaSupport</a>
+p(note). **Note** v1.x only supported GAE but this is not the case anymore. Other NoSQL Databases will be added later.
 
-p(note). **Note** this is exactly the sister class of Play! default class JpaSupport (from Play! version 1.0x)
+h2. <a>Enable Crud Siena support</a>
+
+h3. <a>Install Siena module</a>
+
+bc.. play install siena-2.0.0
+
+h3. <a>Install CrudSiena module</a>
+
+bc.. play install crudsiena-2.0.0
+
+h3. <a>Add CrudSiena module to your dependencies</a>
+
+In your __/conf/dependencies.yml__ file, enable the CrudSiena module by adding these lines:
+
+bc.. require:
+    - play -> play [1.2.1,)
+    - play -> crudsiena [2.0.0,)
+    
+p. Siena module is brought by transitivity through crudsiena 
+We ensure that you have at least Play 1.2.1.
+
+p(note). **IMPORTANT** Do not add default crud dependency, it would collide with Siena Crud. 
+
+h2. <a>Configure your database</a>
+
+For this, please refer to "Siena module":http://www.playframework.org/modules/siena-2.0.0/home
+
+
+h2. <a>Provide a simple Siena model</a>
+
+p(note). **IMPORTANT** you don't need to extend **SienaSupport** anymore.
 
 For example:
 
 bc.. @Table("employees")
-public class Employee extends SienaSupport {
+public class Employee extends Model {
 
         @Id(Generator.AUTO_INCREMENT)
         public Long id; 
@@ -49,107 +71,18 @@ public class Employee extends SienaSupport {
         @Max(100) @NotNull
         public String firstName;      
   
-        @Column("last_name")
-        @Max(200) @NotNull
-        public String lastName;     
-   
-        @Column("contact_info")
-        public Json contactInfo;     
-              
-        @Column("hire_date")
-        public Date hireDate;
-
-        @Column("fire_date")
-        @DateTime	// displays a timepicker
-        public Date fireDate;
-          
-        @Column("boss") 
-        @Index("boss_index")
-        public Employee boss;       
- 
-        @Filter("boss")
-        public Query<Employee> employees;               
-
-        @Embedded
-        public Image profileImage;        
-
-        @Embedded
-        public List<Image> otherImages;
-
-        @Embedded
-        public Map<String, Image> stillImages;        
-
-        @EmbeddedMap
-        public class Image {
-                public String filename;
-                public String title;
-                public int views;
-        }        
-
-		 @Embedded
-        public List<UserBlabla> items;
-
-        @Column("blob")
-        @As(binder=models.crudsiena.GaeBlobBinder.class)
-        public Blob blob;
-        
-        @Column("bytes")
-        @As(binder=models.crudsiena.GaeByteArrayBinder.class)        
-        public byte[] bs;
-        
-        @EmbeddedList
-        public class UserBlabla {
-          @At(0) public String item;
-          @At(1) public String item2;
-          @At(2) public MyEnum itemEnum;
-        }
-        
-        public MyEnum enumField;
-        
-        public static enum MyEnum{
-        	VAL1,
-        	VAL2,
-        	VAL3
-        };
-
-        public static Query<Employee> all() {
-                return Model.all(Employee.class);
-        }        
-
-        public String toString() {
-                return firstName + " " + lastName;
-        }
+        ...
 }
 
 
-p. Please be aware of the possibility to manage:
-* _Json_ fields
-* _One to Many_ relation
-* _Many to One_ relation
-* _Embedded_ json-serialized objects : single object/list/map
+p. For more information about Siena Model, please refer to "Siena module":http://www.playframework.org/modules/siena-2.0.0/home
 
-p(note). For more information about Siena, go directly to "Siena site":http://www.sienaproject.com 
 
-h2. <a>Create a controller inheriting class CRUD for each Siena entity requiring CRUD support</a>
+h2. <a>Create a CRUD controller inheriting class CRUD</a>
 
-p(note). **Note** this is exactly the sister class of Play! default controller CRUD
 
-p. The name of the Controller class corresponding to a model class can be:
-* **ModelClassName** _(this option is valid on in crudsiena because I found it more intuitive)_
-
-For example:
-
-bc. public class Employee extends controllers.CRUD {    
-}
-
-* **ModelClassName+'s'** (pluralized) _(but any char instead of 's' is OK also)_
-
-For example:
-
-bc. public class Employees extends controllers.CRUD {    
-}
-
-* **@For(ModelClass)** annotation added to your controller 
+For each Siena entity requiring CRUD support, create a controller.
+You just have to annotate your controller with **@For(ModelClass)**.
 
 For example:
 
@@ -159,11 +92,10 @@ public class Employees extends controllers.CRUD {
 
 h2. <a>Enable routes to the CRUD module</a>
 
-At the beginning of your conf/routes file, add:
+**At the beginning** of your conf/routes file, add:
 
 bc. *    /admin    module:crudsiena
 
-p(note). You can get more information at "original CRUD module site":http://www.playframework.org/documentation/1.0.3/crud
 
 h2. <a>Play Validation with Siena annotations</a>
 
@@ -179,9 +111,7 @@ h2. <a>Play Validation with Play annotations</a>
 These are Play Annotations managed by the CrudSiena module:
 * **@Required** is managed and displays an error if the field is not filled
 * **@Password** is managed and displays a password text field
-
-p(note). _You can't use Play! binding annotations_ 
-
+* **@Hidden** is managed and hides the field
 
 h2. <a>Specific CrudSiena annotations</a>
 
@@ -189,36 +119,9 @@ h2. <a>Specific CrudSiena annotations</a>
 _(thanks to Spreiter301 for his contribution... see "googlecode issue":http://code.google.com/p/mandubian-play-crud-siena/issues/detail?id=2)_
 *Be careful this annotation calls DB requests that can be quite heavy so it might impact your application performance.* (I will try to provide a mechanism to control where this annotation is applied but it is not so trivial) 
 
-h2. <a>Temporary GAE Blob management in Siena/CrudSiena</a>
+h2. <a>Known limitations</a>
 
-p(note). _After several requests about GAE Blob in Siena and as we are currently developing the new version of Siena which will manage byte[] directly and map them to Blob (JDBC/GAE/...) but it's not yet ready, I have decided to provide a workaround in CrudSiena until then._
+* GAE BLOB binding has been removed because CrudSiena module can't depend on GAE now that it provides multi-db support. So you have to write the class by yourself to use it. __I will provide it as a utility.__
 
-* Temporary how-to for GAE Blob in Siena: 
-** just use the GAE blob type
-** add the @As(binder=models.crudsiena.GaeBlobBinder.class) to bind upload file to the GAE Blob.
-** the binary data from the file are converted into a byte[] and encapsulated into the Blob. 
-* **Warning**: _The mimetype of your file is basically lost during this operation as the Blob only keeps the bytes. That's why the Crud blobfield.html only displays the size of the byte[] and allows you to upload a new file._ 
-
-bc.. 
-import com.google.appengine.api.datastore.Blob;
-
-@Table("employees")
-public class Employee extends SienaSupport {
-
-        ... 
-
-        @Column("blob")
-        @As(binder=models.crudsiena.GaeBlobBinder.class)
-        public Blob blob;
-        
-        ...
-}
-
-
-h2. <a>Known Limitations</a>
-
-h3. **GAE**
-
-* _@Id_ annotated field corresponding to the primary key must be Long type
-* _@Id_ annotated field corresponding to the primary key must be called "id"
-
+This is the first version and issues will be found for sure.
+So don't hesitate to tell me about it or to open issues on "github project":https://github.com/mandubian/play-crud-siena
