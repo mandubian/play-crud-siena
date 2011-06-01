@@ -5,6 +5,8 @@
 
 # Home page
 GET     /                                       Application.index
+GET     /fourword                               Application.fourword
+GET     /fourword2                               Application.fourword2
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
@@ -14,3 +16,4 @@ GET     /public/                                staticDir:public
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
+
