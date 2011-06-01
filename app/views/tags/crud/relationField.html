@@ -1,5 +1,5 @@
 %{ 
-pName = 'object.' + _name + '.' + play.db.Model.Manager.factoryFor(_field.property.relationType).keyName() 
+pName = 'object.' + _name + '.' + play.modules.siena.SienaModelUtils.keyName(_field.property.relationType) 
 
 if(_caller.currentObject)
 	keyVal = play.modules.siena.SienaModelUtils.keyValue(_caller.currentObject)
@@ -18,11 +18,11 @@ if(_caller.currentObject)
                 selected = false;
                 if(field.error?.message != 'validation.required') {
                     if(params[pName]) {
-                        selected = params.getAll(${pName}).contains(it._key().toString())
+                        selected = params.getAll(${pName}).contains(play.modules.siena.SienaModelUtils.keyValue(it).toString())
                     } else {
                     	if(keyVal){
 	                        for (it2 in _value?.fetch()) {
-	                            if(it2._key() == it._key()) {
+	                            if(play.modules.siena.SienaModelUtils.keyValue(it2) == play.modules.siena.SienaModelUtils.keyValue(it)) {
 	                                selected = true;
 	                            }
 	                        }
@@ -30,7 +30,7 @@ if(_caller.currentObject)
                     }
                 }
             }%
-            <option value="${it._key()}" ${selected ? 'selected="true"'.raw() : ''}>${it}#{if it._key() == _id } (me)#{/if}</option>
+            <option value="${play.modules.siena.SienaModelUtils.keyValue(it)}" ${selected ? 'selected="true"'.raw() : ''}>${it}#{if play.modules.siena.SienaModelUtils.keyValue(it) == _id } (me)#{/if}</option>
             %{ } }%
         </select>
         
@@ -51,13 +51,13 @@ if(_caller.currentObject)
                 selected = false
                 if(field.error?.message != 'validation.required') {
                     if(params[pName]) {
-                        selected = (it._key().toString() == params[pName])
+                        selected = (play.modules.siena.SienaModelUtils.keyValue(it).toString() == params[pName])
                     } else {
-                        selected = it._key() == _value?._key()
+                        selected = play.modules.siena.SienaModelUtils.keyValue(it) == play.modules.siena.SienaModelUtils.keyValue(_value)
                     }
                 }
             }%
-            <option value="${it._key()}" ${selected ? 'selected="true"'.raw() : ''}>${it}#{if it._key() == _id } (me)#{/if}</option>
+            <option value="${play.modules.siena.SienaModelUtils.keyValue(it)}" ${selected ? 'selected="true"'.raw() : ''}>${it}#{if play.modules.siena.SienaModelUtils.keyValue(it) == _id } (me)#{/if}</option>
             %{ } }%
         </select>
     #{/else}

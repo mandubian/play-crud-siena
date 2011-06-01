@@ -222,7 +222,7 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         Constructor<?> constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
-        Model object = (Model) constructor.newInstance();
+        Object object = constructor.newInstance();
         try {
             render(type, object);
         } catch (TemplateNotFoundException e) {
@@ -235,7 +235,7 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         Constructor<?> constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
-        Model object = (Model) constructor.newInstance();
+        Object object = constructor.newInstance();
         // BAD IDEA because if there are constraints, the object is not saveds
         // if this is an automatic generated ID, saves it once before to have an id
 //        boolean isGenerated = ClassInfo.isGenerated(ClassInfo.getIdField(type.entityClass));
@@ -256,7 +256,7 @@ public abstract class CRUD extends Controller {
                 render("CRUD/blank.html", type);
             }
         }
-        object._save();
+        SienaPlugin.pm().save(object);
         flash.success(Messages.get("crud.created", type.modelName));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
@@ -264,7 +264,7 @@ public abstract class CRUD extends Controller {
         if (params.get("_saveAndAddAnother") != null) {
             redirect(request.controller + ".blank");
         }
-        redirect(request.controller + ".show", object._key());
+        redirect(request.controller + ".show", SienaModelUtils.keyValue(object));
     }
 
     public static void delete(String id) {
