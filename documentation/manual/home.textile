@@ -31,11 +31,11 @@ h2. <a>Enable Crud Siena support</a>
 
 h3. <a>Install Siena module</a>
 
-bc.. play install siena-2.0.0
+bc.. play install siena
 
 h3. <a>Install CrudSiena module</a>
 
-bc.. play install crudsiena-2.0.0
+bc.. play install crudsiena
 
 h3. <a>Add CrudSiena module to your dependencies</a>
 
