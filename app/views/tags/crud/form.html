@@ -29,7 +29,7 @@
         <div class="crudField crud_${field.type}">
         %{
             def handler = fieldsHandler[fieldName]
-            handler.setProperty('fieldName', 'object.' + field?.name + (field?.type == 'relation' ? '@id' : ''))
+            handler.setProperty('fieldName', 'object.' + field?.name + (field?.type == 'relation' ? '@'+play.modules.siena.SienaModelUtils.keyName(currentType.entityClass) : ''))
             def oldObject = handler.getProperty('object')
             handler.setProperty('object', currentObject)
             out.println(handler.toString())
@@ -83,7 +83,7 @@
                 #{/if}
 
                 #{if field.type == 'relation'}
-                    #{crud.relationField name:field.name, value:(currentObject ? currentObject[field.name] : null), field:field, id:(currentObject ? currentObject.id : null) /}
+                    #{crud.relationField name:field.name, value:(currentObject ? currentObject[field.name] : null), field:field, id:(currentObject ? siena.Util.readField(currentObject, siena.ClassInfo.getIdField(currentType.entityClass)) : null) /}
                 #{/if}
 
                 #{if field.type == 'boolean'}
@@ -99,11 +99,11 @@
                 #{/if}
 
                 #{if field.type == 'embedded'}
-                    #{crud.embeddedField name:field.name, value:(currentObject ? currentObject[field.name] : null), field:field, id:(currentObject ? currentObject.id : null) /}
+                    #{crud.embeddedField name:field.name, value:(currentObject ? currentObject[field.name] : null), field:field, id:(currentObject ? siena.Util.readField(currentObject, siena.ClassInfo.getIdField(currentType.entityClass)) : null) /}
                 #{/if}
                 
                 #{if field.type == 'blob'}
-            		#{crud.blobField name:field.name, value:(currentObject ? currentObject[field.name] : null), id:currentObject?.id /}
+            		#{crud.blobField name:field.name, value:(currentObject ? currentObject[field.name] : null), id:play.modules.siena.SienaModelUtils.keyValue(currentObject) /}
         		#{/if}
 
                 #{if field.type == 'binary'}
