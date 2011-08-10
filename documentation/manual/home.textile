@@ -2,19 +2,21 @@ p(note). Since v2.0.0, the project is hosted by Github "play-crud-siena":https:/
 
 h1. CRUD Siena Play! v2.x
 
+bq. **NEW** v2.0.2 depends on play-siena v2.0.4+siena-1.0.0-b6 & provides GAE Native Embedding & corrects bug in YAML loading of models with @Id field not named "id" and YAML loading of related entities
+
 h2. Release notes
 
-* v2.x has to be considered in parallel with "Play Module siena-2.0.0":http://www.playframework.org/modules/siena-2.0.0/home as both modules were developed together.
+* v2.0.x has to be considered in parallel with "Play Module siena-2.0.x":http://www.playframework.org/modules/siena-2.0.0/home as both modules were developed together.
 
-* v2.x requires Play >v1.2.1 (due to a bug in transitive module dependencies in v1.2).
+* v2.0.x requires Play >v1.2.1 (due to a bug in transitive module dependencies in v1.2).
 
-* v2.x supports :
+* v2.0.x supports :
 ** GAE 
 ** MySQL
 ** Postgresql
 ** H2
 
-* v2.x main new features:
+* v2.0.x main new features:
 ** support for IDs of type Long (auto-generated or manual) and String (manual or auto-generated as UUID).
 ** A new field filter in entity tables that allows to choose which fields are displayed.
 ** The search has been implemented also with some limitations depending on the DB type (and still strange issues to correct IMO).
