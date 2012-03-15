@@ -29,7 +29,7 @@
         <div class="crudField crud_${field.type}">
         %{
             def handler = fieldsHandler[fieldName]
-            handler.setProperty('fieldName', 'object.' + field?.name + (field?.type == 'relation' ? '@'+play.modules.siena.SienaModelUtils.keyName(currentType.entityClass) : ''))
+            handler.setProperty('fieldName', 'root.' + field?.name + (field?.type == 'relation' ? '@'+play.modules.siena.SienaModelUtils.keyName(currentType.entityClass) : ''))
             def oldObject = handler.getProperty('object')
             handler.setProperty('object', currentObject)
             out.println(handler.toString())

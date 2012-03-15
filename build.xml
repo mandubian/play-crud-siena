@@ -13,7 +13,7 @@
         <fileset dir="lib">
             <include name="*.jar"/>
         </fileset>
-    	<fileset dir="${play.path}/modules/siena-2.0.0">
+    	<fileset dir="${play.path}/modules/siena-2.0.7">
             <include name="**/*siena*.jar"/>
         </fileset>
     </path>

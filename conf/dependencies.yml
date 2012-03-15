@@ -1,8 +1,8 @@
 # Application dependencies
 
-self: play -> crudsiena 2.0.2
+self: play -> crudsiena 2.0.3
 
 require:
-    - play [1.2.1,)
-    - play -> siena [2.0.0,)
+    - play [1.2.4,)
+    - play -> siena [2.0.7,)
     

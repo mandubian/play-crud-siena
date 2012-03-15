@@ -18,7 +18,7 @@
 
 #{list items: fieldValue, as:'obj'}
 	#{crud.objectListItem 
-		prefix:'object.'+field, 
+		prefix:'root.'+field, 
 		entityId:id, entityField:field,
 		itemValue:obj, itemType:fieldType, itemIdx:obj_index-1 /}
 #{/list}

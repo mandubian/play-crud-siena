@@ -40,11 +40,11 @@
         <div class="crudField crud_${field.type}">
         %{
             def handler = fieldsHandler[fieldName]
-            handler.setProperty('fieldName', 'object.' + fieldName + (field?.type == 'relation' ? '@id' : ''))
+            handler.setProperty('fieldName', 'root.' + fieldName + (field?.type == 'relation' ? '@id' : ''))
             def oldObject = handler.getProperty('object')
-            handler.setProperty('object', currentObject)
+            handler.setProperty('root', currentObject)
             out.println(handler.toString())
-            handler.setProperty('object', oldObject)
+            handler.setProperty('root', oldObject)
             handler.setProperty('fieldName', null)
         }%
         </div>

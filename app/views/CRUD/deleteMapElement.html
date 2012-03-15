@@ -16,7 +16,7 @@
 
 #{list items: fieldValue?.keySet(), as:'key'}
 	#{crud.objectMapItem 
-		prefix:'object.'+field, 
+		prefix:'root.'+field, 
 		entityId:id, entityField:field,
 		itemKey:key, itemValue:fieldValue?.get(key), itemType:fieldType  /}
 #{/list}

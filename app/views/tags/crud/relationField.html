@@ -1,11 +1,11 @@
 %{ 
-pName = 'object.' + _name + '.' + play.modules.siena.SienaModelUtils.keyName(_field.property.relationType) 
+pName = 'root.' + _name + '.' + play.modules.siena.SienaModelUtils.keyName(_field.property.relationType) 
 
 if(_caller.currentObject)
 	keyVal = play.modules.siena.SienaModelUtils.keyValue(_caller.currentObject)
 }%
 
-#{field 'object.' + _name}
+#{field 'root.' + _name}
     <label for="${field.id}">
         &{_name}
     </label>
