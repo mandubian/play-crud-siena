@@ -198,7 +198,7 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         Object object = SienaModelUtils.findById(type.entityClass, id);
         notFoundIfNull(object);
-        Binder.bind(object, "object", params.all());
+        Binder.bind(object, "root", params.all());
         validation.valid(object);
         if (Validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
@@ -242,7 +242,7 @@ public abstract class CRUD extends Controller {
 //        if(isGenerated){
 //        	object._save();
 //        }
-        Binder.bind(object, "object", params.all());
+        Binder.bind(object, "root", params.all());
         validation.valid(object);
         if (Validation.hasErrors()) {
         	// if it is a generated ID, deletes it not to keep an object with errors

@@ -4,3 +4,5 @@
 /dist
 /.settings
 /modules
+/.DS_Store
+/tmp
